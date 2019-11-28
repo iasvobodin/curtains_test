@@ -101,7 +101,7 @@ void main() {
   float aspectW = uViewSize.x/uViewSize.y;
 
 vec4 tex1 = texture2D(uSampler0, vTextureCoord0);
-vec4 tex2 = texture2D(uSampler1, vec2(vTextureCoord1.x , vTextureCoord1.y/aspectW+(vTextureCoord1.y/aspectW)/2.));
+vec4 tex2 = texture2D(uSampler1, vec2(vTextureCoord1.x , vTextureCoord1.y));
 gl_FragColor = mix(tex1,tex2, uProgress);
 // gl_FragColor = texture2D(uSampler0, vTextureCoord1);
 // gl_FragColor = vec4(vTextureCoord1.x,vTextureCoord1.y,0.0,1.);
