@@ -88,9 +88,14 @@ function toFullscreen(i) {
     value: 1,
     onComplete: () => {
       state = "fullscreen";
-      toGrid(i);
+      setTimeout(() => {
+        toGrid(i);
+      }, 1000);
+      // plane.textures[0].resize();
+      // plane.textures[0].needUpdate();
     }
   });
+  // .reverse();
 }
 
 function getUnifors(i) {
