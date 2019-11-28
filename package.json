@@ -1,0 +1,19 @@
+{
+  "name": "parcel-sandbox",
+  "version": "1.0.0",
+  "description": "Simple Parcel Sandbox",
+  "main": "index.html",
+  "scripts": {
+    "start": "parcel index.html about.html",
+    "build": "parcel build index.html"
+  },
+  "dependencies": {
+    "curtainsjs": "4.1.0",
+    "gsap": "3.0.1",
+    "imagesloaded": "4.1.4"
+  },
+  "devDependencies": {
+    "@babel/core": "7.2.0",
+    "parcel-bundler": "^1.6.1"
+  }
+}
