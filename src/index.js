@@ -1,12 +1,11 @@
-import gsap from "gsap";
 import { Curtains } from "curtainsjs";
 import { vertex, fragment } from "/src/shader.js";
+import anime from "animejs/lib/anime.es.js";
 
 const curtains = new Curtains({
   container: "canvas",
   pixelRatio: 2
 });
-const duration = 2;
 const segments = 64;
 const planes = [];
 let planeElements = document.getElementsByClassName("plane");
@@ -17,85 +16,54 @@ const params = {
   fragmentShader: fragment,
   fov: 75,
   uniforms: {
-    uTime: {
-      name: "uTime", // uniform name that will be passed to our shaders
-      type: "1f", // this means our uniform is a float
-      value: 0
-    },
-    uViewSize: {
-      name: "uViewSize", // uniform name that will be passed to our shaders
-      type: "2f",
-      value: []
-    },
-    uPlanePosition: {
-      name: "uPlanePosition", // uniform name that will be passed to our shaders
-      type: "2f",
-      value: []
-    },
-    uWindowSize: {
-      name: "uWindowSize", // uniform name that will be passed to our shaders
-      type: "2f",
-      value: []
-    },
-    uImgUnit: {
-      name: "uImgUnit", // uniform name that will be passed to our shaders
-      type: "2f",
-      value: []
-    },
-    uPlaneSize: {
-      name: "uPlaneSize", // uniform name that will be passed to our shaders
-      type: "2f",
-      value: []
-    },
-    uProgress: {
-      name: "uProgress",
-      type: "1f",
-      value: 0
-    }
+    uTime: { name: "uTime", type: "1f", value: 0 },
+    uViewSize: { name: "uViewSize", type: "2f", value: [] },
+    uPlanePosition: { name: "uPlanePosition", type: "2f", value: [] },
+    uWindowSize: { name: "uWindowSize", type: "2f", value: [] },
+    uImgUnit: { name: "uImgUnit", type: "2f", value: [] },
+    uPlaneSize: { name: "uPlaneSize", type: "2f", value: [] },
+    uProgress: { name: "uProgress", type: "1f", value: 0 }
   }
 };
 
 for (let i = 0; i < planeElements.length; i++) {
   let plane = curtains.addPlane(planeElements[i], params);
   planes.push(plane);
-  // handlePlanes(i);
   getUnifors(i);
 
-  plane.htmlElement.addEventListener("mousedown", () => toFullscreen(i));
+  plane.htmlElement.addEventListener("mousedown", e => toFullscreen(i, e));
 }
 
-let animating = false;
-let state = "grid";
+let images = document.getElementById("page-content");
+images.addEventListener("mousedown", e => console.log(e));
 
-function toGrid(i) {
-  if (state === "grid") return;
-  let plane = planes[i];
-  animating = true;
-  gsap.to(plane.uniforms.uProgress, {
-    duration,
-    value: 0,
-    onComplete: () => {
-      state = "grid";
-    }
-  });
+const textures = [];
+for (let i = 0; i < images.length; i++) {
+  const imageSet = images[i];
+  imageSet.addEventListener("mousedown", e => toFullscreen(i, e));
 }
-function toFullscreen(i) {
-  if (state === "fullscreen") return;
+
+let animating = true;
+
+function toFullscreen(i, e) {
+  // console.log(e);
+
+  if (animating === false) return;
+  e.target.parentElement.classList.add("plane");
   let plane = planes[i];
-  animating = true;
-  gsap.to(plane.uniforms.uProgress, {
-    duration,
+  animating = false;
+
+  anime({
+    targets: plane.uniforms.uProgress,
+    easing: "linear",
     value: 1,
-    onComplete: () => {
-      state = "fullscreen";
-      setTimeout(() => {
-        toGrid(i);
-      }, 1000);
-      // plane.textures[0].resize();
-      // plane.textures[0].needUpdate();
+    duration: 1000,
+    endDelay: 1000,
+    direction: "alternate",
+    complete() {
+      animating = true;
     }
   });
-  // .reverse();
 }
 
 function getUnifors(i) {

@@ -21,7 +21,7 @@ body {
   transition: opacity 0.5s ease-in;
   opacity: 0.5;
 }
-.plane {
+.planeZ {
   position: relative;
   display: flex;
   align-items: center;
@@ -43,10 +43,11 @@ body {
   /* grid-column-gap: 25px;
   grid-row-gap: 25px; */
 }
-.plane img {
+.planeZ img {
   object-fit: cover;
   object-position: 50% 50%;
-  display: none;
+  width: 100%;
+  height: 100%;
 }
 .largez {
   object-fit: cover;
@@ -54,6 +55,7 @@ body {
   width: 100%;
   height: 100vh;
   opacity: 1;
+  display: none;
 }
 .pl {
   position: fixed;
@@ -62,4 +64,7 @@ body {
   width: 100%;
   height: 100vh;
   z-index: -20;
+}
+.large {
+  display: none;
 }

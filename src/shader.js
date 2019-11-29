@@ -26,7 +26,7 @@ varying vec2 scale;
 void main() {
   
   float aspectW = uViewSize.x/uViewSize.y;
-  float aspectI = uImgUnit.x/uImgUnit.y;
+  float aspectI = uImgUnit.y/uImgUnit.x;
 
 
   float activation = aTextureCoord.x;
@@ -69,7 +69,7 @@ mat3 matrixT = mat3(
   gl_Position =  uPMatrix * uMVMatrix * vec4(pos*matrix, 1.);
   vProgress = vertexProgress;
   vTextureCoord0 = (uTextureMatrix0 * vec4(aTextureCoord, 0.0, 1.0)).xy;
-  vTextureCoord1 = (uTextureMatrix1 * vec4(aTextureCoord.x , aTextureCoord.y, 0.0, 1.0)).xy;
+  vTextureCoord1 = vec2(aTextureCoord.x , aTextureCoord.y);
   vVertexPosition = pos;
 }
 `;
