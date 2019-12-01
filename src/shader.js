@@ -13,6 +13,7 @@ uniform vec2 uPlanePosition;
 uniform vec2 uViewSize;
 uniform vec2 uResolution;
 uniform vec2 uImgUnit;
+uniform vec2 uMouse;
 
 uniform mat4 uTextureMatrix0;
 uniform mat4 uTextureMatrix1;
@@ -23,15 +24,23 @@ varying vec2 vTextureCoord1;
 varying float vProgress;
 varying vec2 scale;
 
+
+float getActivation(vec2 uv){
+  float maxDistance = distance(uMouse, 1.-floor(uMouse+0.5));
+  float dist = smoothstep(0.,maxDistance,distance(uMouse,uv));
+  return dist;
+}
+
 void main() {
   
   float aspectW = uViewSize.x/uViewSize.y;
   float aspectI = uImgUnit.y/uImgUnit.x;
-
-
-  float activation = aTextureCoord.x;
   
-  float latestStart = 0.5;
+  
+
+  float activation = getActivation(aTextureCoord);
+  
+  float latestStart = 0.7;
   float startAt = activation * latestStart;
   float vertexProgress = smoothstep(startAt,1.,uProgress);
   

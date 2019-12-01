@@ -6,18 +6,23 @@ const curtains = new Curtains({
   container: "canvas",
   pixelRatio: 2
 });
+let mousePosition = {
+  x: 0,
+  y: 0
+};
+let animating = true;
 const segments = 64;
-const planes = [];
-let planeElements = document.getElementsByClassName("plane");
 const params = {
   widthSegments: segments,
   heightSegments: segments,
   vertexShader: vertex,
   fragmentShader: fragment,
   fov: 75,
+  autoloadSources: true,
   uniforms: {
     uTime: { name: "uTime", type: "1f", value: 0 },
     uViewSize: { name: "uViewSize", type: "2f", value: [] },
+    uMouse: { name: "uMouse", type: "2f", value: [] },
     uPlanePosition: { name: "uPlanePosition", type: "2f", value: [] },
     uWindowSize: { name: "uWindowSize", type: "2f", value: [] },
     uImgUnit: { name: "uImgUnit", type: "2f", value: [] },
@@ -25,49 +30,78 @@ const params = {
     uProgress: { name: "uProgress", type: "1f", value: 0 }
   }
 };
-
-for (let i = 0; i < planeElements.length; i++) {
-  let plane = curtains.addPlane(planeElements[i], params);
-  planes.push(plane);
-  getUnifors(i);
-
-  plane.htmlElement.addEventListener("mousedown", e => toFullscreen(i, e));
-}
-
+// console.log(curtains);
 let images = document.getElementById("page-content");
-images.addEventListener("mousedown", e => console.log(e));
+images.addEventListener("mousemove", function(e) {
+  handleMovement(e, curtains.planes[0]);
+});
+images.addEventListener("touchmove", function(e) {
+  handleMovement(e, curtains.planes[0]);
+});
+images.addEventListener("mousedown", e => newPlane(e));
 
-const textures = [];
-for (let i = 0; i < images.length; i++) {
-  const imageSet = images[i];
-  imageSet.addEventListener("mousedown", e => toFullscreen(i, e));
+function newPlane(e) {
+  console.time("anim");
+  mousePosition.x = e.clientX;
+  mousePosition.y = e.clientY;
+  if (e.target.localName === "img") {
+    e.target.parentElement.classList.add("plane");
+    let planeElements = document.getElementsByClassName("plane");
+    let plane = curtains.addPlane(planeElements[0], params);
+    plane.onReady(() => {
+      getUnifors();
+      toFullscreen();
+    });
+    console.log(plane);
+  }
 }
 
-let animating = true;
-
-function toFullscreen(i, e) {
-  // console.log(e);
+function toFullscreen() {
+  let plane = curtains.planes[0];
 
   if (animating === false) return;
-  e.target.parentElement.classList.add("plane");
-  let plane = planes[i];
   animating = false;
-
   anime({
-    targets: plane.uniforms.uProgress,
-    easing: "linear",
-    value: 1,
-    duration: 1000,
-    endDelay: 1000,
-    direction: "alternate",
+    targets: "#canvas",
+    zIndex: 10,
+    duration: 0,
+    // endDelay: 3000,
+    // direction: "alternate",
     complete() {
-      animating = true;
+      console.timeEnd("anim");
+      anime({
+        targets: plane.uniforms.uProgress,
+        easing: "linear",
+        value: 1,
+        duration: 1500,
+        endDelay: 500,
+        direction: "alternate",
+        complete() {
+          animating = true;
+        }
+      });
     }
   });
 }
+let plane = curtains.planes[0];
+function handleMovement(e, plane) {
+  // console.log(e);
+  // if (e.targetTouches) {
+  //   mousePosition.x = e.targetTouches[0].clientX;
+  //   mousePosition.y = e.targetTouches[0].clientY;
+  // } else {
+  //   mousePosition.x = e.clientX;
+  //   mousePosition.y = e.clientY;
+  // }
+}
+function getUnifors() {
+  let plane = curtains.planes[0];
 
-function getUnifors(i) {
-  let plane = planes[i];
+  const mouseCoords = plane.mouseToPlaneCoords(
+    mousePosition.x,
+    mousePosition.y
+  );
+
   const rectPlane = plane.getBoundingRect();
 
   const wUnit = (window.innerWidth / rectPlane.width) * curtains.pixelRatio; //ширина плана в условных еденицах
@@ -83,4 +117,5 @@ function getUnifors(i) {
   plane.uniforms.uPlanePosition.value = [xUnit, yUnit];
   plane.uniforms.uWindowSize.value = [window.innerWidth, window.innerHeight];
   plane.uniforms.uImgUnit.value = [widthImgUnit, heightImgUnit];
+  plane.uniforms.uMouse.value = [mouseCoords.x, mouseCoords.y];
 }
