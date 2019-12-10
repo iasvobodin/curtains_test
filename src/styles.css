@@ -27,8 +27,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 40vh;
-  width: calc(40vh * 1.5);
+  height: calc(80vW * 0.66);
+  width: 80vW ;
   /* position: relative; */
   justify-self: center;
   align-self: center;
