@@ -2,18 +2,6 @@ import { Curtains } from "curtainsjs";
 import { vertex, fragment } from "/src/shader.js";
 import anime from "animejs/lib/anime.es.js";
 
-// var tl2 = anime.timeline({
-//   easing: "easeOutExpo",
-//   duration: 8750
-// });
-
-// tl2.add({
-//   autoplay: true,
-//   targets: "#canvas",
-//   scale: 0.5
-// });
-
-// console.log(tl2);
 
 const curtains = new Curtains({
   container: "canvas",
@@ -113,13 +101,13 @@ function toFullscreen() {
 let plane = curtains.planes[0];
 function handleMovement(e, plane) {
   // console.log(e);
-  // if (e.targetTouches) {
-  //   mousePosition.x = e.targetTouches[0].clientX;
-  //   mousePosition.y = e.targetTouches[0].clientY;
-  // } else {
-  //   mousePosition.x = e.clientX;
-  //   mousePosition.y = e.clientY;
-  // }
+  if (e.targetTouches) {
+    mousePosition.x = e.targetTouches[0].clientX;
+    mousePosition.y = e.targetTouches[0].clientY;
+  } else {
+    mousePosition.x = e.clientX;
+    mousePosition.y = e.clientY;
+  }
 }
 function getUnifors() {
   let plane = curtains.planes[0];
