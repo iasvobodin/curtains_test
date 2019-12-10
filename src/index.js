@@ -2,6 +2,19 @@ import { Curtains } from "curtainsjs";
 import { vertex, fragment } from "/src/shader.js";
 import anime from "animejs/lib/anime.es.js";
 
+// var tl2 = anime.timeline({
+//   easing: "easeOutExpo",
+//   duration: 8750
+// });
+
+// tl2.add({
+//   autoplay: true,
+//   targets: "#canvas",
+//   scale: 0.5
+// });
+
+// console.log(tl2);
+
 const curtains = new Curtains({
   container: "canvas",
   pixelRatio: 2
@@ -41,47 +54,61 @@ images.addEventListener("touchmove", function(e) {
 images.addEventListener("mousedown", e => newPlane(e));
 
 function newPlane(e) {
-  console.time("anim");
+  // console.time("anim");
   mousePosition.x = e.clientX;
   mousePosition.y = e.clientY;
   if (e.target.localName === "img") {
-    e.target.parentElement.classList.add("plane");
-    let planeElements = document.getElementsByClassName("plane");
-    let plane = curtains.addPlane(planeElements[0], params);
+    // e.target.parentElement.classList.add("plane");
+    // let planeElements = document.getElementsByClassName("plane");
+    let plane = curtains.addPlane(e.target.parentElement, params);
     plane.onReady(() => {
       getUnifors();
+
       toFullscreen();
     });
-    console.log(plane);
   }
 }
 
 function toFullscreen() {
-  let plane = curtains.planes[0];
-
+  let plane = curtains.planes;
+  console.log(plane);
   if (animating === false) return;
   animating = false;
-  anime({
-    targets: "#canvas",
-    zIndex: 10,
-    duration: 0,
-    // endDelay: 3000,
-    // direction: "alternate",
-    complete() {
-      console.timeEnd("anim");
-      anime({
-        targets: plane.uniforms.uProgress,
-        easing: "linear",
-        value: 1,
-        duration: 1500,
-        endDelay: 500,
-        direction: "alternate",
-        complete() {
-          animating = true;
-        }
-      });
-    }
+  let tl = anime.timeline({
+    autoplay: false,
+    easing: "linear"
   });
+  tl.add(
+    {
+      targets: "#canvas",
+      zIndex: 10,
+      duration: 0
+    },
+    0
+  )
+    .add({
+      targets: plane[0].uniforms.uProgress,
+      value: 1,
+      duration: 1500
+    })
+    .add({
+      targets: plane[0].uniforms.uProgress,
+      value: 0,
+      delay: 800,
+      duration: 1500,
+      complete() {
+        curtains.removePlane(plane[0]);
+        animating = true;
+        console.log(curtains);
+      }
+    })
+    .add({
+      targets: "#canvas",
+      delay: 100,
+      zIndex: -10,
+      duration: 0
+    });
+  tl.play();
 }
 let plane = curtains.planes[0];
 function handleMovement(e, plane) {
