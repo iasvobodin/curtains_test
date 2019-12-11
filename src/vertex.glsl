@@ -8,7 +8,6 @@ attribute vec2 aTextureCoord;
 uniform mat4 uMVMatrix;
 uniform mat4 uPMatrix;
 uniform float uProgress;
-uniform float uSeed;
 uniform vec2 uPlanePosition;
 uniform vec2 uViewSize;
 uniform vec2 uResolution;
@@ -23,9 +22,8 @@ varying float vProgress;
 
 
 float getActivation(vec2 uv) {
-  vec2 point = vec2(uMouse.x,uMouse.x)-vec2(1.5);
-        float maxDistance = distance(point, 1.-floor(point+1.));
-        float dist = smoothstep(0.,maxDistance,distance(point,uv));
+        float maxDistance = distance(uMouse, 1.-floor(uMouse+0.5));
+        float dist = smoothstep(0.,maxDistance,distance(uMouse,uv));
         return dist;
 }
 
@@ -59,45 +57,40 @@ float snoise(vec2 v){
 }
 
 void main() {
+  vec3 pos = aVertexPosition.xyz;
 
   float activation = getActivation(aTextureCoord);
 
   float latestStart = 0.9;
   float startAt = activation * latestStart;
   float vertexProgress = smoothstep(startAt, 1., uProgress);
+  // float vertexProgress = smoothstep(0., 1.- startAt, uProgress);
 
-  vec3 pos = aVertexPosition.xyz;
+  vec3 transformedPos = pos;
+
+  float amplitudeX = .6;
+  float amplitudeY = .5;
+  float frequencyX = .2;
+  float frequencyY = .2;
+  float progressLimit = 0.5;
+
+  float simplexProgress = min(clamp((vertexProgress) / progressLimit, 0., 1.), clamp((1. - vertexProgress) / (1. - progressLimit), 0., 1.));
+  simplexProgress = smoothstep(0., 1., simplexProgress);
+  float noiseX = snoise(vec2(transformedPos.x, transformedPos.y + simplexProgress * 1.) * frequencyX);
+  float noiseY = snoise(vec2(transformedPos.y, transformedPos.x + simplexProgress * 1.) * frequencyY);
+  transformedPos.x += amplitudeX * noiseX * simplexProgress;
+  transformedPos.y += amplitudeY * noiseY * simplexProgress;
+
+  pos = transformedPos;
+
   vec2 scale = vec2(1. + (uViewSize - 1.) * vertexProgress);
+  pos.xy *= scale;
 
-  // float flippedX = pos.x;
-  // pos.x = mix(pos.x, flippedX, vertexProgress);
- pos.z += vertexProgress;
+  pos.y += -uPlanePosition.y * vertexProgress;
+  pos.x += -uPlanePosition.x * vertexProgress;
+  pos.z += vertexProgress;
 
-
-vec3 transformedPos = pos;
-// vertexProgress = uProgress
-
-float simplexProgress = min(clamp((vertexProgress) / 0.5,0.,1.),clamp((1.-vertexProgress) / (1.-0.5),0.,1.));
-      simplexProgress = smoothstep(0.,1.,simplexProgress);
-      float noiseX = snoise(vec2(transformedPos.x +uSeed, transformedPos.y + uSeed + simplexProgress * 1.) * 0.2 ) ;
-      float noiseY = snoise(vec2(transformedPos.y +uSeed, transformedPos.x + uSeed + simplexProgress * 1.) * 0.2) ;
-      transformedPos.x += 0.3 * noiseX * simplexProgress;
-      transformedPos.y += 0.3 * noiseY * simplexProgress;
-
-// pos = transformedPos;
-
-
-  mat3 matrix = mat3(
-    scale.x, 0.0, -uPlanePosition.x * vertexProgress,
-    0.0, scale.y, -uPlanePosition.y * vertexProgress,
-    0.0, 0.0, 1.0
-  );
-
-
-
-
-
-  gl_Position = uPMatrix * uMVMatrix * vec4(pos * matrix, 1.);
+  gl_Position = uPMatrix * uMVMatrix * vec4(pos, 1.);
   vProgress = vertexProgress;
   vTextureCoord0 = (uTextureMatrix0 * vec4(aTextureCoord, 0.0, 1.0)).xy;
   vTextureCoord1 = (uTextureMatrix1 * vec4(aTextureCoord, 0.0, 1.0)).xy;
