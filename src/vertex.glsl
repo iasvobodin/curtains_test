@@ -62,7 +62,7 @@ void main() {
 
   float activation = getActivation(aTextureCoord);
 
-  float latestStart = 0.5;
+  float latestStart = 0.9;
   float startAt = activation * latestStart;
   float vertexProgress = smoothstep(startAt, 1., uProgress);
 
@@ -71,7 +71,7 @@ void main() {
 
   // float flippedX = pos.x;
   // pos.x = mix(pos.x, flippedX, vertexProgress);
-  pos.z += vertexProgress;
+ pos.z += vertexProgress;
 
 
 vec3 transformedPos = pos;
@@ -84,7 +84,7 @@ float simplexProgress = min(clamp((vertexProgress) / 0.5,0.,1.),clamp((1.-vertex
       transformedPos.x += 0.3 * noiseX * simplexProgress;
       transformedPos.y += 0.3 * noiseY * simplexProgress;
 
-pos = transformedPos;
+// pos = transformedPos;
 
 
   mat3 matrix = mat3(

@@ -1,20 +1,20 @@
 import { Curtains } from "curtainsjs";
-// import { vertex, fragment } from "/src/shader.js";
+import { vertex, fragment } from "/src/shader.js";
 import anime from "animejs/lib/anime.es.js";
-import vertex from "/src/vertex.glsl";
-import fragment from "/src/fragment.glsl";
-import { log } from "util";
+// import vertex from "/src/vertex.glsl";
+// import fragment from "/src/fragment.glsl";
 
 const curtains = new Curtains({
   container: "canvas",
   pixelRatio: 2
 });
-let mousePosition = {
+var mousePosition = {
   x: 0,
   y: 0
 };
 let animating = true;
-const segments = 64;
+const segments = 124;
+const duration = 1000;
 const params = {
   widthSegments: segments,
   heightSegments: segments,
@@ -23,7 +23,11 @@ const params = {
   fov: 75,
   autoloadSources: true,
   uniforms: {
-    uSeed: {name: "uSeed", type: "1f",value : Math.floor(Math.random() * 10000) },
+    uSeed: {
+      name: "uSeed",
+      type: "1f",
+      value: Math.floor(Math.random() * 10000)
+    },
     uTime: { name: "uTime", type: "1f", value: 0 },
     uViewSize: { name: "uViewSize", type: "2f", value: [] },
     uMouse: { name: "uMouse", type: "2f", value: [] },
@@ -34,17 +38,36 @@ const params = {
 };
 // console.log(curtains);
 let images = document.getElementById("page-content");
-images.addEventListener("mousedown", e => newPlane(e));
+// console.log({ images });
+for (let i = 0; i < images.children.length; i++) {
+  const image = images.children[i].children[0];
+  image.addEventListener("mousedown", e => newPlane(e));
+}
+
+// images.addEventListener("mousedown", e => newPlane(e));
+// images.addEventListener("mousemove", e => console.log(e.clientX, e.clientY));
 
 function newPlane(e) {
+  console.time("click");
+  console.time("plane");
   console.log(e);
-  mousePosition.x = e.clientX;
-  mousePosition.y = e.clientY;
+
   if (e.target.localName === "img") {
     // e.target.parentElement.classList.add("plane");
     // let planeElements = document.getElementsByClassName("plane");
     let plane = curtains.addPlane(e.target.parentElement, params);
+    var rect = plane.getBoundingRect();
+    const mouseNormalized = {
+      x: e.offsetX / rect.width,
+      // Allways invert Y coord
+      y: 1 - e.offsetY / rect.height
+    };
+
+    console.log(mouseNormalized);
+    // update our mouse position uniform
+    plane.uniforms.uMouse.value = [mouseNormalized.x, mouseNormalized.y];
     plane.onReady(() => {
+      console.timeEnd("plane");
       getUnifors();
       toFullscreen();
     });
@@ -60,25 +83,22 @@ function toFullscreen() {
     autoplay: false,
     easing: "linear"
   });
-  tl.add(
-    {
-      targets: "#canvas",
-      zIndex: 10,
-      duration: 0
-    },
-    0
-  )
+  tl.add({ targets: "#canvas", zIndex: 10, duration: 0 })
     .add({
       targets: curtains.planes[0].uniforms.uProgress,
       value: 1,
-      duration: 2000,
-      easing: "cubicBezier(0.215, 0.61, 0.355, 1)",
+      delay: 500,
+      duration: duration,
+      easing: "linear",
+      begin: function() {
+        console.timeEnd("click");
+      }
     })
     .add({
       targets: curtains.planes[0].uniforms.uProgress,
       value: 0,
-      delay: 800,
-      duration: 1500,
+      delay: 1500,
+      duration: duration,
       complete() {
         curtains.removePlane(curtains.planes[0]);
         animating = true;
@@ -107,10 +127,10 @@ function toFullscreen() {
 function getUnifors() {
   let plane = curtains.planes[0];
 
-  const mouseCoords = plane.mouseToPlaneCoords(
-    mousePosition.x,
-    mousePosition.y
-  );
+  // const mouseCoords = plane.mouseToPlaneCoords(
+  //   mousePosition.x,
+  //   mousePosition.y
+  // );
 
   const rectPlane = plane.getBoundingRect();
 
@@ -123,20 +143,20 @@ function getUnifors() {
   const widthImg = plane.images[1].naturalWidth; //ширина изображения в условных еденицах
   const heightImg = plane.images[1].naturalHeight;
 
-  let imageAspect = heightImg/widthImg;
-    let a1; let a2;
-    if(window.innerHeight/window.innerWidth > imageAspect) {
-      a1 = (window.innerWidth/window.innerHeight) * imageAspect ;
-      a2 = 1;
-    } else{
-      a1 = 1;
-      a2 = (window.innerHeight/window.innerWidth) / imageAspect;
-    }
+  let imageAspect = heightImg / widthImg;
+  let a1;
+  let a2;
+  if (window.innerHeight / window.innerWidth > imageAspect) {
+    a1 = (window.innerWidth / window.innerHeight) * imageAspect;
+    a2 = 1;
+  } else {
+    a1 = 1;
+    a2 = window.innerHeight / window.innerWidth / imageAspect;
+  }
 
   plane.uniforms.uViewSize.value = [wUnit, hUnit];
   plane.uniforms.uPlanePosition.value = [xUnit, yUnit];
-  plane.uniforms.uMouse.value = [mouseCoords.x, mouseCoords.y];
-  plane.uniforms.uResolution.value = [a1,a2]
-  console.log(plane.uniforms.uMouse.value);
-  
+  // plane.uniforms.uMouse.value = [mousePosition.x, mousePosition.y];
+  plane.uniforms.uResolution.value = [a1, a2];
+  // console.log(plane.uniforms.uMouse.value);
 }
