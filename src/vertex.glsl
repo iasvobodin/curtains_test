@@ -88,6 +88,7 @@ void main() {
 
   pos.y += -uPlanePosition.y * vertexProgress;
   pos.x += -uPlanePosition.x * vertexProgress;
+  pos.z -1.;
   pos.z += vertexProgress;
 
   gl_Position = uPMatrix * uMVMatrix * vec4(pos, 1.);
