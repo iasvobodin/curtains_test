@@ -3,17 +3,20 @@ import { Curtains } from "curtainsjs";
 import anime from "animejs/lib/anime.es.js";
 import vertex from "/src/vertex.glsl";
 import fragment from "/src/fragment.glsl";
-
+// let der = gl.getExtension("OES_standard_derivatives");
 let planeWrap = document.getElementById("page-content"),
   webgl = document.getElementById("canvas"),
   curtains = new Curtains({
     container: webgl,
     pixelRatio: window.devicePixelRatio
-  }),
-  mouseNormalized = { x: 0, y: 0 },
+  });
+curtains.glContext.getExtension("OES_standard_derivatives");
+// curtains.glContext.getExtension("EXT_shader_texture_lod");
+// console.log(curtains);
+let mouseNormalized = { x: 0, y: 0 },
   animating = true,
-  segments = 64,
-  duration = 1700,
+  segments = 128,
+  duration = 1600,
   params = {
     widthSegments: segments,
     heightSegments: segments,
@@ -30,7 +33,7 @@ let planeWrap = document.getElementById("page-content"),
       uProgress: { name: "uProgress", type: "1f", value: 0 }
     }
   };
-
+// document.addEventListener("scroll", e => console.log(e));
 curtains.disableDrawing();
 for (let i = 0; i < planeWrap.children.length; i++) {
   let plane = curtains.addPlane(planeWrap.children[i], params);
@@ -96,12 +99,7 @@ function toFullscreen(plane) {
         curtains.disableDrawing();
       }
     })
-    .add({
-      targets: webgl,
-      delay: 1,
-      zIndex: -10,
-      duration: 0
-    });
+    .add({ targets: webgl, delay: 1, zIndex: -10, duration: 0 });
   tl.play();
 }
 

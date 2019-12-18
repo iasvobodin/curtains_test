@@ -18,6 +18,7 @@ uniform mat4 uTextureMatrix1;
 
 varying vec2 vTextureCoord0;
 varying vec2 vTextureCoord1;
+varying vec3 vNormal;
 varying float vProgress;
 
 
@@ -61,17 +62,17 @@ void main() {
 
   float activation = getActivation(aTextureCoord);
 
-  float latestStart = 0.9;
+  float latestStart = .9;
   float startAt = activation * latestStart;
   float vertexProgress = smoothstep(startAt, 1., uProgress);
   // float vertexProgress = smoothstep(0., 1.- startAt, uProgress);
 
   vec3 transformedPos = pos;
 
-  float amplitudeX = .6;
-  float amplitudeY = .5;
-  float frequencyX = .2;
-  float frequencyY = .2;
+  float amplitudeX = .3;
+  float amplitudeY = .3;
+  float frequencyX = .3;
+  float frequencyY = .1;
   float progressLimit = 0.5;
 
   float simplexProgress = min(clamp((vertexProgress) / progressLimit, 0., 1.), clamp((1. - vertexProgress) / (1. - progressLimit), 0., 1.));
@@ -90,8 +91,8 @@ void main() {
   pos.x += -uPlanePosition.x * vertexProgress;
   pos.z -1.;
   pos.z += vertexProgress;
-
   gl_Position = uPMatrix * uMVMatrix * vec4(pos, 1.);
+  vNormal = pos;
   vProgress = vertexProgress;
   vTextureCoord0 = (uTextureMatrix0 * vec4(aTextureCoord, 0.0, 1.0)).xy;
   vTextureCoord1 = (uTextureMatrix1 * vec4(aTextureCoord, 0.0, 1.0)).xy;
