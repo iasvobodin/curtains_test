@@ -18,7 +18,6 @@ uniform mat4 uTextureMatrix1;
 
 varying vec2 vTextureCoord0;
 varying vec2 vTextureCoord1;
-varying vec3 vNormal;
 varying float vProgress;
 
 
@@ -92,7 +91,6 @@ void main() {
   pos.z -1.;
   pos.z += vertexProgress;
   gl_Position = uPMatrix * uMVMatrix * vec4(pos, 1.);
-  vNormal = pos;
   vProgress = vertexProgress;
   vTextureCoord0 = (uTextureMatrix0 * vec4(aTextureCoord, 0.0, 1.0)).xy;
   vTextureCoord1 = (uTextureMatrix1 * vec4(aTextureCoord, 0.0, 1.0)).xy;

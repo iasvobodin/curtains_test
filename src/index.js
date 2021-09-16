@@ -1,4 +1,4 @@
-import { Curtains } from "curtainsjs";
+import { Curtains, Plane } from "curtainsjs";
 // import { vertex, fragment } from "/src/shader.js";
 import anime from "animejs/lib/anime.es.js";
 import vertex from "/src/vertex.glsl";
@@ -10,7 +10,7 @@ let planeWrap = document.getElementById("page-content"),
     container: webgl,
     pixelRatio: window.devicePixelRatio
   });
-curtains.glContext.getExtension("OES_standard_derivatives");
+// curtains.glContext.getExtension("OES_standard_derivatives");
 // curtains.glContext.getExtension("EXT_shader_texture_lod");
 // console.log(curtains);
 let mouseNormalized = { x: 0, y: 0 },
@@ -34,9 +34,10 @@ let mouseNormalized = { x: 0, y: 0 },
     }
   };
 // document.addEventListener("scroll", e => console.log(e));
-curtains.disableDrawing();
+// curtains.disableDrawing();
 for (let i = 0; i < planeWrap.children.length; i++) {
-  let plane = curtains.addPlane(planeWrap.children[i], params);
+  let plane = new Plane(curtains, planeWrap.children[i], params) 
+  // curtains.addPlane(planeWrap.children[i], params);
   plane.onReady(() => {
     plane.htmlElement.addEventListener("mousedown", () => toFullscreen(plane));
     plane.htmlElement.addEventListener("mousemove", e => mouseEv(e, plane));
@@ -64,16 +65,17 @@ function toFullscreen(plane) {
   if (animating === false) return;
   animating = false;
   let tl = anime.timeline({ autoplay: false, easing: "linear" });
-  tl.add({ targets: webgl, zIndex: 10, duration: 0 })
-    .add(
-      {
-        targets: plane.htmlElement,
-        delay: 100,
-        opacity: 0,
-        duration: 100
-      },
-      "+=200"
-    )
+  tl
+  // .add({ targets: webgl, zIndex: 10, duration: 0 })
+    // .add(
+    //   {
+    //     targets: plane.htmlElement,
+    //     delay: 100,
+    //     opacity: 0,
+    //     duration: 100
+    //   },
+    //   "+=200"
+    // )
     .add(
       {
         targets: plane.uniforms.uProgress,
@@ -82,7 +84,7 @@ function toFullscreen(plane) {
         duration: duration,
         easing: "cubicBezier(0.215, 0.61, 0.355, 1)",
         begin: function() {
-          curtains.enableDrawing();
+          // curtains.enableDrawing();
         }
       },
       "-=200"
@@ -96,10 +98,10 @@ function toFullscreen(plane) {
       complete() {
         // console.timeEnd("click");
         animating = true;
-        curtains.disableDrawing();
+        // curtains.disableDrawing();
       }
     })
-    .add({ targets: webgl, delay: 1, zIndex: -10, duration: 0 });
+    // .add({ targets: webgl, delay: 1, zIndex: -10, duration: 0 });
   tl.play();
 }
 
